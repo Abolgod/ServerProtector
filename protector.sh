@@ -23,11 +23,27 @@ function logo() {
     echo -e "╚════════════════════════════╝${NC}"
 }
 
+function download_country_file() {
+    local cc=$1
+    cc="${cc,,}"  # lowercase
+    mkdir -p "$COUNTRY_DIR"
+    url="https://www.ipdeny.com/ipblocks/data/countries/$cc.zone"
+    echo -e "${YELLOW}Downloading $cc.zone...${NC}"
+    curl -f -s -o "$COUNTRY_DIR/$cc.zone" "$url"
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to download $cc.zone${NC}"
+        return 1
+    fi
+    echo -e "${GREEN}$cc.zone downloaded successfully.${NC}"
+    return 0
+}
+
 function pre_requisites() {
     echo -e "${YELLOW}Updating packages and installing required tools...${NC}"
     apt update -y
     apt install -y ipset iptables curl
 }
+
 
 function install_crowdsec() {
     echo -e "${GREEN}Installing advanced Anti-DDoS (CrowdSec)...${NC}"
@@ -54,63 +70,77 @@ function uninstall_crowdsec() {
 
 function ban_country_request() {
     read -p "Enter 2-letter country code to block (e.g., ru): " cc
-    cc="${cc,,}" # to lowercase
+    cc="${cc,,}"
+
     if [[ ! -f "$COUNTRY_DIR/$cc.zone" ]]; then
-        echo -e "${RED}File $COUNTRY_DIR/$cc.zone not found!${NC}"
-        press_enter
-        return
+        echo -e "${YELLOW}File $cc.zone not found locally. Downloading...${NC}"
+        download_country_file "$cc"
+        if [[ $? -ne 0 ]]; then
+            echo -e "${RED}Cannot proceed without $cc.zone file.${NC}"
+            press_enter
+            return
+        fi
     fi
+
     ipset destroy ${cc}_set 2>/dev/null
     ipset create ${cc}_set hash:net
+
     while read -r ip; do
         ipset add -exist ${cc}_set "$ip"
     done < "$COUNTRY_DIR/$cc.zone"
-    # قبل از اضافه کردن قانون مطمئن شو اضافه نشده
+
     if ! iptables -C INPUT -m set --match-set ${cc}_set src -j DROP &>/dev/null; then
         iptables -I INPUT -m set --match-set ${cc}_set src -j DROP
     fi
+
     echo -e "${GREEN}Incoming traffic from country '$cc' banned successfully.${NC}"
     press_enter
 }
 
+
 function ban_country_connect() {
     read -p "Enter 2-letter country code to block outgoing (e.g., ru): " cc
     cc="${cc,,}"
+
     if [[ ! -f "$COUNTRY_DIR/$cc.zone" ]]; then
-        echo -e "${RED}File $COUNTRY_DIR/$cc.zone not found!${NC}"
-        press_enter
-        return
+        echo -e "${YELLOW}File $cc.zone not found locally. Downloading...${NC}"
+        download_country_file "$cc"
+        if [[ $? -ne 0 ]]; then
+            echo -e "${RED}Cannot proceed without $cc.zone file.${NC}"
+            press_enter
+            return
+        fi
     fi
+
     ipset destroy ${cc}_out 2>/dev/null
     ipset create ${cc}_out hash:net
+
     while read -r ip; do
         ipset add -exist ${cc}_out "$ip"
     done < "$COUNTRY_DIR/$cc.zone"
+
     if ! iptables -C OUTPUT -m set --match-set ${cc}_out dst -j DROP &>/dev/null; then
         iptables -I OUTPUT -m set --match-set ${cc}_out dst -j DROP
     fi
+
     echo -e "${GREEN}Outgoing traffic to country '$cc' banned successfully.${NC}"
     press_enter
 }
 
+
 function unban_country() {
     read -p "Enter 2-letter country code to unban (e.g., ru): " cc
     cc="${cc,,}"
-
     echo -e "${YELLOW}Removing incoming ban for country '$cc'...${NC}"
-    # حذف قوانین iptables اگر وجود داشت
     while iptables -C INPUT -m set --match-set ${cc}_set src -j DROP &>/dev/null; do
         iptables -D INPUT -m set --match-set ${cc}_set src -j DROP
     done
-    # حذف ipset
     ipset destroy ${cc}_set 2>/dev/null
-
     echo -e "${YELLOW}Removing outgoing ban for country '$cc'...${NC}"
     while iptables -C OUTPUT -m set --match-set ${cc}_out dst -j DROP &>/dev/null; do
         iptables -D OUTPUT -m set --match-set ${cc}_out dst -j DROP
     done
     ipset destroy ${cc}_out 2>/dev/null
-
     echo -e "${GREEN}Country '$cc' unbanned completely.${NC}"
     press_enter
 }
@@ -118,7 +148,6 @@ function unban_country() {
 function optimize_network() {
     echo -e "${CYAN}Installing BBR + FQ_CoDel and setting DNS...${NC}"
     modprobe tcp_bbr
-    # جلوگیری از اضافه شدن چندباره tcp_bbr به modules.conf
     if ! grep -q "tcp_bbr" /etc/modules-load.d/modules.conf 2>/dev/null; then
         echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
     fi
