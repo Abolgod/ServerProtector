@@ -19,6 +19,10 @@ Everything is permanent, bash-native, and 100% made for real-world use — espec
 Fork it, use it, customize it. Open source & badass.
 Enjoy the power 💥
 
+
+
+
+
 🇮🇷 توضیح فارسی
 🛡️ محافظ نهایی سرور – ساخته‌ی Abol / Beyonder
 این اسکریپت همون Ultimate Server Protector v1.1 هست – یه ابزار فوق‌العاده برای تأمین امنیت و بهینه‌سازی سرورهای اوبونتو ۲۰.۰۴ و ۲۲.۰۴ 🧠⚡
