@@ -48,11 +48,13 @@ Enjoy the power 💥
 
 
 
-Ultimate Server Protector v1.1 - Complete optimizer with BBR versions  
-‼️ INSTRUCTION ‼️  
-👉 Debian Base (Ubuntu & Debian) x86 & Arm64 
+# Ultimate Server Protector v1.1
 
- 
+‼️ **INSTRUCTION** ‼️  
+👉 Debian Base (Ubuntu & Debian) x86 & Arm64
+
+```bash
 apt update -y && apt install curl -y && bash <(curl -s https://raw.githubusercontent.com/Abolgod/ServerProtector/main/ultimate-server-protector.sh)
+
 
 
