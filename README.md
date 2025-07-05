@@ -43,3 +43,14 @@ Enjoy the power 💥
 💡 ساخته شده با عشق ❤️ توسط Abol (Beyonder) برای کسانی که امنیت و عملکرد براشون مهمه.
 راحت استفاده کن، کاستوم کن، پابلیک و آزاد.
 با خیال راحت امنیتتو بده دستش 💥
+
+
+
+
+
+Ultimate Server Protector v1.1 - Complete server security and optimization tool
+
+‼️ INSTRUCTION ‼️
+👉 Debian Base (Ubuntu & Debian) x86 & Arm64
+apt update -y && apt install curl -y && bash <(curl -s https://raw.githubusercontent.com/Abolgod/ServerProtector/main/ultimate-server-protector.sh)
+
