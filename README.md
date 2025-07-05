@@ -54,7 +54,7 @@ Enjoy the power 💥
 👉 Debian Base (Ubuntu & Debian) x86 & Arm64
 
 ```bash
-apt update -y && apt install curl -y && bash <(curl -s https://raw.githubusercontent.com/Abolgod/ServerProtector/main/ultimate-server-protector.sh)
+apt update -y && apt install curl -y && bash <(curl -s https://raw.githubusercontent.com/Abolgod/ServerProtector/main/protector.sh)
 
 
 
